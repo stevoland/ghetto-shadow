@@ -47,13 +47,45 @@
         socket = io.connect('http://localhost:8001');
 
         socket.on('ready', function () {
-            socket.emit('msg', 'new message');
+            //socket.emit('msg', 'new message');
+
+            d.addEventListener('click', function (e) {
+                console.info(e);
+
+                var node = e.target,
+                    anchor;
+
+                while (node) {
+                    if (node.nodeName.toUpperCase() === 'A') {
+                        anchor = node;
+                        break;
+                    } else {
+                        node = node.parentNode;
+                    }
+                }
+
+                if (anchor && anchor.href) {
+                    socket.emit('href', anchor.href);
+                }
+
+                e.preventDefault();
+            }, false);
+
+            window.onpopstate = function(event) {
+                console.info('here');
+              socket.emit('href', d.location);
+              return false;
+            };
+            /*window.onbeforeunload = function (e) {
+                console.info(e);
+                return false;
+            }*/
         });
 
         socket.emit('join', id);
 
-        socket.on('msg', function (msg) {
-            console.info(msg);
+        socket.on('href', function (href) {
+            window.location = href;
         });
     }
 
@@ -65,6 +97,8 @@
 Get config
     - id
     - weinre
+
+    capture user events: click, keydown, keypress, keyup, popstate
 
 
  */
