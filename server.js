@@ -1,6 +1,19 @@
-var io = require('socket.io').listen(8001);
+var io = require('socket.io'),
+	express = require('express'),
+	app = express(),
+	server = require('http').createServer(app);
+	
+io = io.listen(server);
+server.listen(8001);
 
-io.static.add('/client.js', {
+/*app.get('/client.js', function (req, res) {
+	res.send('ohai');
+});*/
+
+app.use("/test", express.static(__dirname + '/test'));
+app.use("/public", express.static(__dirname + '/public'));
+
+/*io.static.add('/client.js', {
 	file: './client.js'
 });
 io.static.add('/test/integration/index.html', {
@@ -18,7 +31,7 @@ io.static.add('/test/integration/page2.html', {
 		encoding: 'utf8',
 		gzip: true
 	}
-});
+});*/
 
 
 io.sockets.on('connection', function (socket) {
