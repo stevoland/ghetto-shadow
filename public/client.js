@@ -7,7 +7,14 @@
 		key,
 		isLeader;
 
-	// http://blog.stevenlevithan.com/archives/parseuri
+	/**
+	 * Parse a URI into an object
+	 * Credit: http://blog.stevenlevithan.com/archives/parseuri
+	 *
+	 * @private
+	 * @param  {string} str     URI to parse
+	 * @return {object}         URI object
+	 */
 	var parseURI = (function () {
 		var options = {
 			strictMode: false,
@@ -41,12 +48,14 @@
 		return parseURI;
 	}());
 
-	
-
-
-	// https://github.com/ded/domready
-
-	// http://stackoverflow.com/a/6158050
+	/**
+	 * Get a CSS selector string to target a node
+	 * Credit: http://stackoverflow.com/a/6158050
+	 *
+	 * @private
+	 * @param  {HTMLElement} el     Node to target
+	 * @return {string}             CSS selector
+	 */
 	function getCSSSelector(el) {
 		var names = [];
 		while (el.parentNode) {
@@ -66,13 +75,28 @@
 		return names.join(' > ');
 	}
 
+	/**
+	 * Convert a cleaned event from socket.io into a real event and fire it
+	 * - Replace CSS selectors with HTMLElements
+	 * - Replace window and document placeholders with real references
+	 * - If any elements can't be found but a URI is included, fall back to
+	 *     using that
+	 *
+	 * @private
+	 * @param  {Event} ev Event object
+	 * @return {void}
+	 */
 	function receiveEvent (e) {
-		var i;
+		var i,
+			elementsFound = true;
 
 		if (e.gsElements) {
 			i = e.gsElements.length;
 			while (i--) {
 				e[e.gsElements[i]] = d.querySelector(e[e.gsElements[i]]);
+				if (e[e.gsElements[i]] === null) {
+					elementsFound = false;
+				}
 			}
 			delete e.gsElements;
 		}
@@ -91,11 +115,21 @@
 			delete e.gsWindows;
 		}
 
-		e.gsSimulated = true;
-
-		simulateEvent(e.originalTarget || e.target, e.type, e);
+		if (elementsFound) {
+			e.gsSimulated = true;
+			simulateEvent(e.originalTarget || e.target, e.type, e);
+		} else if (e.gsURI) {
+			window.location = e.gsURI;
+		}
 	}
 
+	/**
+	 * If a node or an ancestor is an anchor return the href or null
+	 *
+	 * @private
+	 * @param  {HTMLElement} node The node
+	 * @return {string}      The anchor's href or null
+	 */
 	function getHrefFromNode (node) {
 		var anchor,
 			href;
@@ -116,13 +150,25 @@
 		return href;
 	}
 
+	/**
+	 * Clean an event for sending to socket.io.
+	 * - Remove complex objects
+	 * - Replace HTMLElements with CSS selectors
+	 * - Replace window and document references with placeholders
+	 * - If the target or an ancestor is an anchor, include the href
+	 *     in case the target can't be found on another client instance
+	 *
+	 * @private
+	 * @param  {Event} ev Event object
+	 * @return {void}
+	 */
 	function sendEvent (ev) {
 		var e = ev || w.event,
 			e2 = {
 				gsElements: [],
 				gsDocuments: [],
 				gsWindows: [],
-				gsHref: getHrefFromNode(e.target),
+				gsURI: getHrefFromNode(e.target),
 				gsSimulated: true
 			},
 			i;
@@ -146,11 +192,9 @@
 				e2.gsWindows.push(i);
 			} else if (e[i] === null) {
 				e2[i] = e[i];
-			} else if (typeof e[i] === 'function') {
-
-			} else if (typeof e[i] === 'object') {
-				e2[i] = e[i].toString();
-			}  else {
+			} else if (typeof e[i] === 'function' || typeof e[i] === 'object') {
+				// ignore other complex objects
+			} else {
 				e2[i] = e[i];
 			}
 		}
@@ -158,6 +202,15 @@
 		socket.emit('event', e2);
 	}
 
+	/**
+	 * Trigger a HTMLEvent or MouseEvent
+	 *
+	 * @private
+	 * @param  {HTMLElement} element     The target element
+	 * @param  {string}      eventName   Event type
+	 * @param  {object}      ...         [optional] event object
+	 * @return {HTMLElement}             The target element
+	 */
 	var simulateEvent = (function (w, d) {
 		var eventMatchers = {
 				'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
@@ -254,17 +307,12 @@
 
 
 /*
+	TODO:
 
-Get config
-	+ id
-	- weinre
-
-	capture user events: click, popstate
-
-	fake back/forward buttons
-
-	domready
-
-	AMD/CJS?
+	- include weinre
+	- fake back/forward/reload buttons (https://github.com/ded/domready)
+	- include querySelector polyfill + event listener for old IE
+	- load socket.io internally
+	- AMD/CJS?
 
  */
