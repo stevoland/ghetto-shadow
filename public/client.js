@@ -72,9 +72,7 @@
 		if (e.gsElements) {
 			i = e.gsElements.length;
 			while (i--) {
-				console.info(e[e.gsElements[i]]);
 				e[e.gsElements[i]] = d.querySelector(e[e.gsElements[i]]);
-				console.info(e[e.gsElements[i]]);
 			}
 			delete e.gsElements;
 		}
@@ -98,12 +96,33 @@
 		simulateEvent(e.originalTarget || e.target, e.type, e);
 	}
 
-	function sendEvent(ev) {
+	function getHrefFromNode (node) {
+		var anchor,
+			href;
+
+		while (node) {
+			if (node.nodeName.toUpperCase() === 'A') {
+				anchor = node;
+				break;
+			} else {
+				node = node.parentNode;
+			}
+		}
+
+		if (anchor && anchor.href) {
+			href = anchor.href;
+		}
+
+		return href;
+	}
+
+	function sendEvent (ev) {
 		var e = ev || w.event,
 			e2 = {
 				gsElements: [],
 				gsDocuments: [],
 				gsWindows: [],
+				gsHref: getHrefFromNode(e.target),
 				gsSimulated: true
 			},
 			i;
@@ -216,52 +235,9 @@
 
 		socket.on('ready', function () {
 			d.addEventListener('click', sendEvent, false);
-
-
-			/*d.addEventListener('submit', function (e) {
-				e.preventDefault();
-				console.info(e);
-			}, false);*/
-
-
-			/*d.addEventListener('click', function (e) {
-				var node = e.target,
-					anchor;
-
-				while (node) {
-					if (node.nodeName.toUpperCase() === 'A') {
-						anchor = node;
-						break;
-					} else {
-						node = node.parentNode;
-					}
-				}
-
-				if (anchor && anchor.href) {
-					socket.emit('href', anchor.href);
-
-					console.info(getXPath(anchor));
-
-				}
-
-					e.preventDefault();
-
-			}, false);*/
-
-			window.onpopstate = function(event) {
-				socket.emit('href', d.location);
-			};
-
-
 		});
 
 		socket.emit('join', key);
-
-		isLeader = parseURI(w.location).queryKey.gsleader;
-
-		if (isLeader) {
-			//socket.emit('reload');
-		}
 
 		socket.on('href', function (href) {
 			w.location = href;
@@ -288,5 +264,7 @@ Get config
 	fake back/forward buttons
 
 	domready
+
+	AMD/CJS?
 
  */

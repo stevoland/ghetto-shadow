@@ -6,33 +6,8 @@ var io = require('socket.io'),
 io = io.listen(server);
 server.listen(8001);
 
-/*app.get('/client.js', function (req, res) {
-	res.send('ohai');
-});*/
-
 app.use("/test", express.static(__dirname + '/test'));
 app.use("/public", express.static(__dirname + '/public'));
-
-/*io.static.add('/client.js', {
-	file: './client.js'
-});
-io.static.add('/test/integration/index.html', {
-	file: './test/integration/index.html',
-	mime: {
-		type: 'text/html',
-		encoding: 'utf8',
-		gzip: true
-	}
-});
-io.static.add('/test/integration/page2.html', {
-	file: './test/integration/page2.html',
-	mime: {
-		type: 'text/html',
-		encoding: 'utf8',
-		gzip: true
-	}
-});*/
-
 
 io.sockets.on('connection', function (socket) {
 
