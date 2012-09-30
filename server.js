@@ -29,10 +29,4 @@ io.sockets.on('connection', function (socket) {
 			socket.broadcast.to(key).emit('event', e);
 		});
 	});
-
-	socket.on('reload', function () {
-		socket.get('room', function (err, key) {
-			socket.broadcast.to(key).emit('reload');
-		});
-	});
 });

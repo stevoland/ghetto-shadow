@@ -4,8 +4,9 @@
 		scripts = document.getElementsByTagName('script'),
 		script  = scripts[scripts.length-1],
 		src     = script.src,
+		windowURIObj,
 		key,
-		isLeader;
+		isDriver = false;
 
 	/**
 	 * Parse a URI into an object
@@ -117,10 +118,18 @@
 
 		if (elementsFound) {
 			e.gsSimulated = true;
-			simulateEvent(e.originalTarget || e.target, e.type, e);
+			if (e.type === 'change') {
+				receiveChangeEvent(e);
+			} else {
+				simulateEvent(e.originalTarget || e.target, e.type, e);
+			}
 		} else if (e.gsURI) {
 			window.location = e.gsURI;
 		}
+	}
+
+	function receiveChangeEvent(e) {
+		e.target.value = e.value;
 	}
 
 	/**
@@ -278,26 +287,80 @@
 
 		return simulate;
 	}(w, d));
-	
+
+	function createCookie(name, value, ms) {
+		var date,
+			expires;
+		if (ms) {
+			date = new Date();
+			date.setTime(date.getTime() + ms);
+			expires = "; expires=" + date.toGMTString();
+		}
+		else {
+			expires = "";
+		}
+		document.cookie = name + "=" + value + expires + "; path=/";
+	}
+
+	function readCookie(name) {
+		var nameEQ = name + "=",
+			ca = document.cookie.split(';'),
+			c;
+
+		for (var i = 0; i < ca.length; i++) {
+			c = ca[i];
+			while (c.charAt(0) === ' ') {
+				c = c.substring(1,c.length);
+			}
+			if (c.indexOf(nameEQ) === 0) {
+				return c.substring(nameEQ.length, c.length);
+			}
+		}
+		return null;
+	}
+
+	function removeCookie(name) {
+		createCookie(name, "", -1);
+	}
+
+	function onClickHandler(e) {
+		createCookie('gsclick', '1', 5000);
+		sendEvent(e);
+	}
+
+	function onChangeHandler(e) {
+		e.value = e.target.value;
+		sendEvent(e);
+	}
 
 
-	key = parseURI(w.location).queryKey.gskey || parseURI(script.src).queryKey.gskey;
+	windowURIObj = parseURI(w.location);
+	key = windowURIObj.queryKey.gskey || parseURI(script.src).queryKey.gskey;
 
 	if (key) {
 		socket = io.connect();
 
 		socket.on('ready', function () {
-			d.addEventListener('click', sendEvent, false);
+			if (windowURIObj.queryKey.gsdriver || readCookie('gsdriver')) {
+				createCookie('gsdriver', '1', 365 * 24 * 60 * 60 * 1000);
+				isDriver = true;
+			} else {
+				removeCookie('gsdriver');
+			}
+
+			if (isDriver && !readCookie('gsclick')) {
+				socket.emit('href', w.location.href.replace(/(gsdriver=[^&]*)/ig, ''));
+			}
+			d.addEventListener('click', onClickHandler, false);
+
+			var input = document.querySelector('input');
+			input.addEventListener('change', onChangeHandler, false);
 		});
 
 		socket.emit('join', key);
 
 		socket.on('href', function (href) {
 			w.location = href;
-		});
-
-		socket.on('reload', function () {
-			w.location.reload();
 		});
 
 		socket.on('event', receiveEvent);
@@ -310,7 +373,9 @@
 	TODO:
 
 	- include weinre
-	- fake back/forward/reload buttons (https://github.com/ded/domready)
+	- bulletproof change events
+	- https://github.com/ded/domready
+	- fake back/forward buttons
 	- include querySelector polyfill + event listener for old IE
 	- load socket.io internally
 	- AMD/CJS?
