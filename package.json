@@ -1,10 +1,10 @@
 {
   "name": "ghetto-shadow",
-  "description": "",
+  "description": "Like Adobe Shadow without the native client apps",
   "version": "0.1.0",
   "homepage": "https://github.com/stevoland/ghetto-shadow",
   "author": {
-    "name": "stevoland",
+    "name": "stevo (Stephen Collings)",
     "email": "stevoland@gmail.com",
     "url": "http://stevoland.com"
   },

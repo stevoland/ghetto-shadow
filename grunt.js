@@ -12,14 +12,14 @@ module.exports = function(grunt) {
     },
     concat: {
       dist: {
-        src: ['<banner:meta.banner>', '<file_strip_banner:lib/<%= pkg.name %>.js>'],
-        dest: 'dist/<%= pkg.name %>.js'
+        src: ['<banner:meta.banner>', '<file_strip_banner:lib/client.js>'],
+        dest: 'public/client.js'
       }
     },
     min: {
       dist: {
         src: ['<banner:meta.banner>', '<config:concat.dist.dest>'],
-        dest: 'dist/<%= pkg.name %>.min.js'
+        dest: 'public/client.min.js'
       }
     },
     test: {
@@ -43,17 +43,20 @@ module.exports = function(grunt) {
         sub: true,
         undef: true,
         boss: true,
-        eqnull: true
+        eqnull: true,
+        smarttabs: true,
+        browser: true
       },
       globals: {
         exports: true,
-        module: false
+        module: false,
+        io: false
       }
     },
     uglify: {}
   });
 
   // Default task.
-  grunt.registerTask('default', 'lint test concat min');
+  grunt.registerTask('default', 'lint concat min');
 
 };
