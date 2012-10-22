@@ -1,0 +1,9 @@
+
+client.js
+----------------
+C:/Users/scollings/Git/ghetto-shadow/node_modules/grunt-requirejs/node_modules/almond/almond.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/URL.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/DOMTrigger.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/CSSelector.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/cookie.js
+client.js
