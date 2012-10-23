@@ -9,4 +9,6 @@ C:/Users/scollings/Git/ghetto-shadow/vendor/cookie.js
 C:/Users/scollings/Git/ghetto-shadow/vendor/event.js
 C:/Users/scollings/Git/ghetto-shadow/vendor/domready.js
 C:/Users/scollings/Git/ghetto-shadow/vendor/sizzle.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/type.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/each.js
 client.js

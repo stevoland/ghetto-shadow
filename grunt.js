@@ -68,7 +68,9 @@ module.exports = function(grunt) {
 				'cookie': '../vendor/cookie',
 				'event': '../vendor/event',
 				'domready': '../vendor/domready',
-				'Sizzle': '../vendor/sizzle'
+				'Sizzle': '../vendor/sizzle',
+				'type': '../vendor/type',
+				'each': '../vendor/each'
 			},
 			modules: [
 				{

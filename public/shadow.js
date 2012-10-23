@@ -2467,6 +2467,119 @@ if ( typeof define === "function" && define.amd ) {
 // EXPOSE
 
 })( window );
+define('type',['require','exports','module'],function (require, exports, module) {
+
+/**
+ * toString ref.
+ */
+
+var toString = Object.prototype.toString;
+
+/**
+ * Return the type of `val`.
+ *
+ * @param {Mixed} val
+ * @return {String}
+ * @api public
+ */
+
+module.exports = function(val){
+  switch (toString.call(val)) {
+    case '[object Function]': return 'function';
+    case '[object Date]': return 'date';
+    case '[object RegExp]': return 'regexp';
+    case '[object Arguments]': return 'arguments';
+    case '[object Array]': return 'array';
+  }
+
+  if (val === null) return 'null';
+  if (val === undefined) return 'undefined';
+  if (val === Object(val)) return 'object';
+
+  return typeof val;
+};
+
+});
+
+define('each',['require','exports','module','type'],function (require, exports, module) {
+
+/**
+ * Module dependencies.
+ */
+
+var type = require('type');
+
+/**
+ * HOP reference.
+ */
+
+var has = Object.prototype.hasOwnProperty;
+
+/**
+ * Iterate the given `obj` and invoke `fn(val, i)`.
+ *
+ * @param {String|Array|Object} obj
+ * @param {Function} fn
+ * @api public
+ */
+
+module.exports = function(obj, fn){
+  switch (type(obj)) {
+    case 'array':
+      return array(obj, fn);
+    case 'object':
+      if ('number' == typeof obj.length) return array(obj, fn);
+      return object(obj, fn);
+    case 'string':
+      return string(obj, fn);
+  }
+};
+
+/**
+ * Iterate string chars.
+ *
+ * @param {String} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function string(obj, fn) {
+  for (var i = 0; i < obj.length; ++i) {
+    fn(obj.charAt(i), i);
+  }
+}
+
+/**
+ * Iterate object keys.
+ *
+ * @param {Object} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function object(obj, fn) {
+  for (var key in obj) {
+    if (has.call(obj, key)) {
+      fn(key, obj[key]);
+    }
+  }
+}
+
+/**
+ * Iterate array-ish.
+ *
+ * @param {Array|Object} obj
+ * @param {Function} fn
+ * @api private
+ */
+
+function array(obj, fn) {
+  for (var i = 0; i < obj.length; ++i) {
+    fn(obj[i], i);
+  }
+}
+});
+
 define('client',[
 	'URL',
 	'DOMTrigger',
@@ -2474,17 +2587,18 @@ define('client',[
 	'cookie',
 	'event',
 	'domready',
-	'Sizzle'
-], function (URL, simulateEvent, getCSSelector, cookie, event, domready, sizzle) {
+	'Sizzle',
+	'each'
+], function (URL, simulateEvent, getCSSelector, cookie, event, domready, sizzle, each) {
 
 	var SOCKET_IO_PATH = '/socket.io/socket.io.js',
 		socket,
-		winURIObj,
 		key,
 		w,
 		d,
 		isDriver = false;
 
+	// Set cookie expiries in seconds
 	cookie.expiresMultiplier = 1;
 
 	/**
@@ -2498,9 +2612,8 @@ define('client',[
 	 * @private
 	 * @param  {Event} ev Event object
 	 */
-	function sendEvent (ev) {
-		var e = ev || w.event,
-			e2 = {
+	function sendEvent (e) {
+		var e2 = {
 				gsElements: [],
 				gsDocuments: [],
 				gsWindows: [],
@@ -2534,6 +2647,11 @@ define('client',[
 				e2[i] = e[i];
 			}
 		}
+
+		if (e.type === 'change' && typeof e.target.value !== 'undefined') {
+			e2.gsValue = e.target.value;
+		}
+
 		
 		socket.emit('event', e2);
 	}
@@ -2551,12 +2669,17 @@ define('client',[
 	 */
 	function receiveEvent (e) {
 		var i,
+			el,
 			elementsFound = true;
+
+		console.info(e.type);
+		console.info(e);
 
 		if (e.gsElements) {
 			i = e.gsElements.length;
 			while (i--) {
-				e[e.gsElements[i]] = d.querySelector(e[e.gsElements[i]]);
+				el = sizzle(e[e.gsElements[i]]);
+				e[e.gsElements[i]] = (el.length) ? el[0] : null;
 				if (e[e.gsElements[i]] === null) {
 					elementsFound = false;
 				}
@@ -2694,12 +2817,14 @@ define('client',[
 	function bindHandlers () {
 		event.bind(d, 'click', onClickHandler, false);
 
-		var input = d.querySelector('input');
-		console.info(sizzle('input'));
-		if (input) {
-			event.bind(input, 'change', onChangeHandler, false);
-			event.bind(input, 'focus', sendEvent, false);
-			event.bind(input, 'blur', sendEvent, false);
+		var inputs = sizzle('input, select');
+		if (inputs.length) {
+			// These events don't bubble so we can't delegate
+			each(inputs, function (input) {
+				event.bind(input, 'change', onChangeHandler, false);
+				event.bind(input, 'focus', sendEvent, false);
+				event.bind(input, 'blur', sendEvent, false);
+			});
 		}
 	}
 
@@ -2713,11 +2838,11 @@ define('client',[
 		 * @param  {object} doc      document ref
 		 */
 		init: function (srcURI, win, doc) {
-			var ioURIObj;
+			var ioURIObj,
+				winURIObj = URL.parse(win.location);
 
 			w = win;
 			d = doc;
-			winURIObj = URL.parse(w.location);
 			key = winURIObj.queryKey.gskey || URL.parse(srcURI).queryKey.gskey;
 
 			ioURIObj = URL.parse(srcURI);
@@ -2747,7 +2872,7 @@ define('client',[
 	- include weinre
 	- bulletproof change events
 	- fake back/forward buttons
-	- include querySelector polyfill + event listener for old IE
+	- tests
 
  */;
 ;(function (w, d) {
