@@ -58,18 +58,23 @@ module.exports = function(grunt) {
 		},
 		requirejs: {
 			almond: true,
-			//wrap: true,
 			appDir: './lib',
 			baseUrl: '.',
 			dir: 'public',
 			paths: {
-				URL: '../vendor/URL',
-				DOMTrigger: '../vendor/DOMTrigger',
-				CSSelector: '../vendor/CSSelector',
-				cookie: '../vendor/cookie'
+				'URL': '../vendor/URL',
+				'DOMTrigger': '../vendor/DOMTrigger',
+				'CSSelector': '../vendor/CSSelector',
+				'cookie': '../vendor/cookie',
+				'event': '../vendor/event'
 			},
-			modules: [{name: 'client'}],
-			optimize: "none"
+			modules: [
+				{
+					name: 'client'
+				}
+			],
+			optimize: "none",
+			cjsTranslate: true
 		}
 	});
 
