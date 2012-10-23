@@ -66,7 +66,9 @@ module.exports = function(grunt) {
 				'DOMTrigger': '../vendor/DOMTrigger',
 				'CSSelector': '../vendor/CSSelector',
 				'cookie': '../vendor/cookie',
-				'event': '../vendor/event'
+				'event': '../vendor/event',
+				'domready': '../vendor/domready',
+				'Sizzle': '../vendor/sizzle'
 			},
 			modules: [
 				{
@@ -74,7 +76,10 @@ module.exports = function(grunt) {
 				}
 			],
 			optimize: "none",
-			cjsTranslate: true
+			cjsTranslate: true,
+			shim: {
+				'Sizzle': []
+			}
 		}
 	});
 

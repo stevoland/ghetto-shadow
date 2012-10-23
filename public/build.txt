@@ -6,4 +6,7 @@ C:/Users/scollings/Git/ghetto-shadow/vendor/URL.js
 C:/Users/scollings/Git/ghetto-shadow/vendor/DOMTrigger.js
 C:/Users/scollings/Git/ghetto-shadow/vendor/CSSelector.js
 C:/Users/scollings/Git/ghetto-shadow/vendor/cookie.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/event.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/domready.js
+C:/Users/scollings/Git/ghetto-shadow/vendor/sizzle.js
 client.js
