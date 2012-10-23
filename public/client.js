@@ -2790,7 +2790,6 @@ define('client',[
 		socket = io.connect();
 
 		socket.on('ready', function () {
-			console.info('ready');
 			if (isDriver && (gsClick !== w.location.href)) {
 				socket.emit('href', w.location.href.replace(/(gsdriver=[^&]*)/ig, ''));
 			}
@@ -2811,7 +2810,7 @@ define('client',[
 	function bindHandlers () {
 		event.bind(d, 'click', onClickHandler, false);
 
-		var inputs = sizzle('input, select');
+		var inputs = sizzle('input, textarea, select');
 		if (inputs.length) {
 			// These events don't bubble so we can't delegate
 			each(inputs, function (input) {
