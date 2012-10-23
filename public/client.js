@@ -2601,6 +2601,7 @@ define('client',[
 	// Set cookie expiries in seconds
 	cookie.expiresMultiplier = 1;
 
+
 	/**
 	 * Clean an event for sending to socket.io.
 	 * - Remove complex objects
@@ -2647,11 +2648,6 @@ define('client',[
 				e2[i] = e[i];
 			}
 		}
-
-		if (e.type === 'change' && typeof e.target.value !== 'undefined') {
-			e2.gsValue = e.target.value;
-		}
-
 		
 		socket.emit('event', e2);
 	}
@@ -2671,9 +2667,6 @@ define('client',[
 		var i,
 			el,
 			elementsFound = true;
-
-		console.info(e.type);
-		console.info(e);
 
 		if (e.gsElements) {
 			i = e.gsElements.length;
@@ -2797,6 +2790,7 @@ define('client',[
 		socket = io.connect();
 
 		socket.on('ready', function () {
+			console.info('ready');
 			if (isDriver && (gsClick !== w.location.href)) {
 				socket.emit('href', w.location.href.replace(/(gsdriver=[^&]*)/ig, ''));
 			}
@@ -2865,13 +2859,3 @@ define('client',[
 		}
 	};
 });
-
-/*
-	TODO:
-
-	- include weinre
-	- bulletproof change events
-	- fake back/forward buttons
-	- tests
-
- */;

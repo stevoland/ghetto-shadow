@@ -2,9 +2,19 @@ var io = require('socket.io'),
 	express = require('express'),
 	app = express(),
 	server = require('http').createServer(app);
+
+
 	
 io = io.listen(server);
+
+io.enable('browser client gzip');          // gzip the file
+io.set('transports', [
+    'websocket',
+	'jsonp-polling'
+]);
+
 server.listen(8001);
+
 
 app.use("/test", express.static(__dirname + '/test'));
 app.use("/public", express.static(__dirname + '/public'));
